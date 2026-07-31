@@ -77,7 +77,9 @@ pub fn run(ctx: &Ctx) -> Result<()> {
         .parent()
         .filter(|p| !p.as_os_str().is_empty());
     let key_dir_mode = key_dir.and_then(perms::file_mode);
-    let key_dir_writable = key_dir_mode.map(perms::group_world_writable).unwrap_or(false);
+    let key_dir_writable = key_dir_mode
+        .map(perms::group_world_writable)
+        .unwrap_or(false);
 
     let dumpable = harden::dumpable();
     let mlock = harden::probe_mlock();
