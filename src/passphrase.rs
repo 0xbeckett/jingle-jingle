@@ -166,6 +166,7 @@ fn read_line_noecho(
 /// never pull more of the input stream than the one line we were asked for.
 #[cfg(unix)]
 fn read_line_bytes(tty: &mut std::fs::File) -> Result<Zeroizing<Vec<u8>>> {
+    use zeroize::Zeroize;
     let mut buf = Zeroizing::new(Vec::with_capacity(64));
     let mut byte = [0u8; 1];
     loop {
@@ -178,7 +179,7 @@ fn read_line_bytes(tty: &mut std::fs::File) -> Result<Zeroizing<Vec<u8>>> {
     if buf.last() == Some(&b'\r') {
         buf.pop();
     }
-    byte[0] = 0;
+    byte.zeroize();
     Ok(buf)
 }
 
