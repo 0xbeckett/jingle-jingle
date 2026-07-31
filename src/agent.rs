@@ -74,8 +74,9 @@ mod imp {
 
     use zeroize::Zeroizing;
 
-    use super::{DEFAULT_TTL, KEY_LEN, MAX_TTL, REQ_GET_KEY, REQ_SHUTDOWN, REQ_STATUS, RESP_OK,
-                Status};
+    use super::{
+        DEFAULT_TTL, KEY_LEN, MAX_TTL, REQ_GET_KEY, REQ_SHUTDOWN, REQ_STATUS, RESP_OK, Status,
+    };
     use crate::{Error, Result};
 
     const IO_TIMEOUT: Duration = Duration::from_secs(5);
@@ -118,6 +119,7 @@ mod imp {
     ///     the stale file is unlinked so the next caller starts clean;
     ///   * a peer whose uid is not ours — refused, and left in place (not ours
     ///     to remove).
+    ///
     /// A `None` return always means "no usable agent"; callers fall through to
     /// the passphrase path. It never blocks: `connect(2)` on a unix socket with
     /// no listener fails immediately, and every subsequent read/write carries a
@@ -325,7 +327,7 @@ mod imp {
     /// requests one at a time, and expires exactly at `deadline` even if no
     /// client ever connects. Never returns: it `exit`s after zeroizing the key
     /// and unlinking the socket.
-    fn serve(mut key: Zeroizing<[u8; KEY_LEN]>, deadline: Instant, sock: &Path) -> ! {
+    fn serve(key: Zeroizing<[u8; KEY_LEN]>, deadline: Instant, sock: &Path) -> ! {
         // Keep the key off swap in this (post-fork) address space.
         crate::harden::mlock(key.as_ref());
 

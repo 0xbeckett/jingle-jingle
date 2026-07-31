@@ -41,7 +41,9 @@ pub fn parse_ttl(s: &str) -> Result<Duration> {
         ))
     })?;
     let secs = n.checked_mul(unit_secs).ok_or_else(|| {
-        Error::Usage(format!("--ttl '{s}' is absurdly large; pick something under 30 days"))
+        Error::Usage(format!(
+            "--ttl '{s}' is absurdly large; pick something under 30 days"
+        ))
     })?;
     if secs == 0 {
         return Err(Error::Usage("--ttl must be greater than zero".into()));
