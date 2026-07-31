@@ -103,6 +103,19 @@ fn trim_one_newline(bytes: &mut Vec<u8>) {
 #[cfg(unix)]
 fn from_tty(confirm: bool) -> Result<Zeroizing<Vec<u8>>> {
     use std::fs::OpenOptions;
+    use std::io::IsTerminal;
+
+    // If nothing on the standard streams is a terminal, there is no interactive
+    // user to prompt: fail fast with the actionable message rather than blocking
+    // on a /dev/tty read that would never be answered. (stderr being a terminal
+    // is enough — that keeps `printf pw | jingle add x --stdin` promptable even
+    // though its stdin is a pipe.)
+    let interactive = std::io::stdin().is_terminal()
+        || std::io::stdout().is_terminal()
+        || std::io::stderr().is_terminal();
+    if !interactive {
+        return Err(Error::Passphrase(NO_SOURCE_MSG.into()));
+    }
 
     let mut tty = OpenOptions::new()
         .read(true)
