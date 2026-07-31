@@ -76,6 +76,9 @@ fn unlock_then_exec_needs_no_passphrase() {
         .assert()
         .success()
         .stdout(predicate::str::contains("github"));
+
+    // Tidy up so the detached agent doesn't linger past the test.
+    tv.cmd().arg("lock").assert().success();
 }
 
 // ---- lock then exec fails with the actionable message ---------------------
