@@ -74,6 +74,22 @@ pub fn load(path: &Path) -> Result<Zeroizing<[u8; KEY_LEN]>> {
         }
     }
 
+    // A tight keyfile inside a directory another user can write is not
+    // protected: they can rename it aside and drop in their own. Enforce the
+    // parent directory just as strictly as the keyfile itself.
+    if let Some(parent) = path.parent().filter(|p| !p.as_os_str().is_empty()) {
+        if let Some(mode) = crate::perms::file_mode(parent) {
+            if crate::perms::group_world_writable(mode) {
+                return Err(Error::Keyfile(format!(
+                    "keyfile's parent directory {} is group/world writable (mode {:o}); another user could replace the keyfile. fix with: chmod 700 {}",
+                    parent.display(),
+                    mode,
+                    parent.display()
+                )));
+            }
+        }
+    }
+
     if meta.len() != KEY_LEN as u64 {
         return Err(Error::Keyfile(format!(
             "keyfile {} has unexpected size {} (expected {KEY_LEN} bytes)",
@@ -83,8 +99,11 @@ pub fn load(path: &Path) -> Result<Zeroizing<[u8; KEY_LEN]>> {
     }
 
     let bytes = Zeroizing::new(fs::read(path)?);
+    // Lock the raw keyfile bytes into RAM before they land anywhere durable.
+    crate::harden::mlock(bytes.as_ref());
     let mut key = Zeroizing::new([0u8; KEY_LEN]);
     key.copy_from_slice(&bytes);
+    crate::harden::mlock(key.as_ref());
     Ok(key)
 }
 
