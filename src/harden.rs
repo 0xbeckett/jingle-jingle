@@ -13,6 +13,7 @@
 //! lack the primitive, and a soft warn-and-continue when the kernel refuses
 //! (an over-tight `RLIMIT_MEMLOCK` must never abort the program).
 
+#[cfg(unix)]
 use std::sync::atomic::{AtomicBool, Ordering};
 
 /// Outcome of an `mlock` attempt, surfaced by `jingle doctor`.
@@ -36,6 +37,7 @@ impl MlockState {
     }
 }
 
+#[cfg(unix)]
 static MLOCK_WARNED: AtomicBool = AtomicBool::new(false);
 
 /// Disable core dumps and same-uid ptrace as early as possible. Call this
@@ -125,6 +127,7 @@ pub fn probe_mlock() -> MlockState {
 mod tests {
     use super::*;
 
+    #[cfg(unix)]
     #[test]
     fn empty_range_is_trivially_locked() {
         assert_eq!(mlock(&[]), MlockState::Locked);
