@@ -86,7 +86,11 @@ pub fn is_wrapped(data: &[u8]) -> bool {
     data.len() >= 5 && data[0..4] == MAGIC && data[4] == FORMAT_VERSION
 }
 
-fn derive_kek(passphrase: &[u8], salt: &[u8; SALT_LEN], p: &KdfParams) -> Result<Zeroizing<[u8; 32]>> {
+fn derive_kek(
+    passphrase: &[u8],
+    salt: &[u8; SALT_LEN],
+    p: &KdfParams,
+) -> Result<Zeroizing<[u8; 32]>> {
     let params = Params::new(p.m_cost, p.t_cost, p.p_cost, Some(32))
         .map_err(|e| Error::Passphrase(format!("invalid Argon2 parameters: {e}")))?;
     let argon = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
@@ -275,7 +279,10 @@ mod tests {
         bad[0] ^= 0xFF; // break the magic
         assert!(matches!(unwrap(&bad, b"pw"), Err(Error::Keyfile(_))));
         // Truncated image.
-        assert!(matches!(unwrap(&image[..10], b"pw"), Err(Error::Keyfile(_))));
+        assert!(matches!(
+            unwrap(&image[..10], b"pw"),
+            Err(Error::Keyfile(_))
+        ));
     }
 
     #[test]

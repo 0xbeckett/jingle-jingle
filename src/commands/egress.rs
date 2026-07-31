@@ -350,7 +350,9 @@ impl<'a> Redactor<'a> {
             }
             let better = match best {
                 None => true,
-                Some((bstart, _, blen)) => start < bstart || (start == bstart && w.value.len() > blen),
+                Some((bstart, _, blen)) => {
+                    start < bstart || (start == bstart && w.value.len() > blen)
+                }
             };
             if better {
                 best = Some((start, idx, w.value.len()));

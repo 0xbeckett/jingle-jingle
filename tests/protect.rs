@@ -170,7 +170,10 @@ fn unprotect_reverts_to_v1_and_needs_no_passphrase_afterward() {
     // Back to a raw 32-byte key.
     assert_eq!(std::fs::metadata(tv.keyfile_path()).unwrap().len(), 32);
     let v2bak = with_suffix(&tv.keyfile_path(), ".v2.bak");
-    assert!(v2bak.exists(), "unprotect keeps the old wrapped key as backup");
+    assert!(
+        v2bak.exists(),
+        "unprotect keeps the old wrapped key as backup"
+    );
 
     // And the vault opens again with no passphrase at all, entry intact.
     tv.cmd()
@@ -198,7 +201,10 @@ fn aborted_protect_leaves_the_v1_keyfile_untouched() {
 
     // The migration aborted: the live keyfile is byte-for-byte the original v1.
     let after = std::fs::read(tv.keyfile_path()).unwrap();
-    assert_eq!(after, original, "aborted protect must not touch the keyfile");
+    assert_eq!(
+        after, original,
+        "aborted protect must not touch the keyfile"
+    );
     assert_eq!(after.len(), 32);
 
     // No staged temp keyfile was left behind.

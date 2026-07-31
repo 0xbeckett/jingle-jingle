@@ -55,9 +55,9 @@ fn from_command(cmd: &std::ffi::OsStr) -> Result<Zeroizing<Vec<u8>>> {
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::inherit());
-    let out = command.output().map_err(|e| {
-        Error::Passphrase(format!("failed to run {ENV_PASSPHRASE_CMD}: {e}"))
-    })?;
+    let out = command
+        .output()
+        .map_err(|e| Error::Passphrase(format!("failed to run {ENV_PASSPHRASE_CMD}: {e}")))?;
     if !out.status.success() {
         return Err(Error::Passphrase(format!(
             "{ENV_PASSPHRASE_CMD} exited with {} and produced no passphrase",
@@ -140,10 +140,7 @@ fn from_tty(confirm: bool) -> Result<Zeroizing<Vec<u8>>> {
 /// Prompt on `tty` with terminal echo disabled and read one line (its trailing
 /// newline stripped). Echo is always restored, including on error.
 #[cfg(unix)]
-fn read_line_noecho(
-    tty: &mut std::fs::File,
-    prompt: &str,
-) -> Result<Zeroizing<Vec<u8>>> {
+fn read_line_noecho(tty: &mut std::fs::File, prompt: &str) -> Result<Zeroizing<Vec<u8>>> {
     use std::io::Write;
     use std::os::unix::io::AsRawFd;
 

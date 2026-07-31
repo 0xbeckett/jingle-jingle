@@ -92,7 +92,8 @@ pub fn unprotect(ctx: &Ctx) -> Result<()> {
     match keyfile::detect(kf)? {
         Format::V1Raw => {
             return Err(Error::Usage(
-                "keyfile is not protected (it is already a raw v1 key); nothing to unprotect".into(),
+                "keyfile is not protected (it is already a raw v1 key); nothing to unprotect"
+                    .into(),
             ));
         }
         Format::V2Wrapped => {}

@@ -195,12 +195,21 @@ fn leak_on_stdout_is_redacted_and_audited() {
     let out = cmd.assert().success().get_output().clone();
 
     let stdout = String::from_utf8(out.stdout).unwrap();
-    assert!(stdout.contains("[REDACTED by jingle]"), "stdout: {stdout:?}");
-    assert!(!stdout.contains(LEAKY), "secret leaked verbatim: {stdout:?}");
+    assert!(
+        stdout.contains("[REDACTED by jingle]"),
+        "stdout: {stdout:?}"
+    );
+    assert!(
+        !stdout.contains(LEAKY),
+        "secret leaked verbatim: {stdout:?}"
+    );
 
     let stderr = String::from_utf8(out.stderr).unwrap();
     assert!(stderr.contains("github:password"), "warning: {stderr:?}");
-    assert!(stderr.contains("stdout"), "warning names stream: {stderr:?}");
+    assert!(
+        stderr.contains("stdout"),
+        "warning names stream: {stderr:?}"
+    );
     assert!(!stderr.contains(LEAKY), "warning must not echo value");
 
     let audit = std::fs::read_to_string(tv.audit_path()).unwrap();
@@ -228,9 +237,18 @@ fn leak_on_stderr_is_redacted_and_audited() {
 
     assert!(String::from_utf8(out.stdout).unwrap().is_empty());
     let stderr = String::from_utf8(out.stderr).unwrap();
-    assert!(stderr.contains("[REDACTED by jingle]"), "stderr: {stderr:?}");
-    assert!(!stderr.contains(LEAKY), "secret leaked verbatim: {stderr:?}");
-    assert!(stderr.contains("child stderr"), "warning names stream: {stderr:?}");
+    assert!(
+        stderr.contains("[REDACTED by jingle]"),
+        "stderr: {stderr:?}"
+    );
+    assert!(
+        !stderr.contains(LEAKY),
+        "secret leaked verbatim: {stderr:?}"
+    );
+    assert!(
+        stderr.contains("child stderr"),
+        "warning names stream: {stderr:?}"
+    );
 
     let audit = std::fs::read_to_string(tv.audit_path()).unwrap();
     assert!(audit.contains("\"outcome\":\"leaked\""), "audit: {audit}");
@@ -257,10 +275,16 @@ fn secret_split_across_read_chunks_is_still_caught() {
     let out = cmd.assert().success().get_output().clone();
 
     let stdout = String::from_utf8(out.stdout).unwrap();
-    assert!(stdout.contains("[REDACTED by jingle]"), "boundary split missed");
+    assert!(
+        stdout.contains("[REDACTED by jingle]"),
+        "boundary split missed"
+    );
     assert!(!stdout.contains(LEAKY), "secret survived across the split");
     // All the filler bytes must pass through untouched around the redaction.
-    assert!(stdout.matches('A').count() >= 8190, "filler must pass through");
+    assert!(
+        stdout.matches('A').count() >= 8190,
+        "filler must pass through"
+    );
 }
 
 #[cfg(unix)]
@@ -281,16 +305,22 @@ fn clean_output_has_no_warning_and_passes_through() {
     ]);
     let out = cmd.assert().success().get_output().clone();
 
-    assert_eq!(
-        String::from_utf8(out.stdout).unwrap(),
-        "hello-clean-world"
-    );
+    assert_eq!(String::from_utf8(out.stdout).unwrap(), "hello-clean-world");
     let stderr = String::from_utf8(out.stderr).unwrap();
-    assert!(!stderr.contains("[REDACTED by jingle]"), "false positive: {stderr:?}");
-    assert!(!stderr.contains("leaked"), "false positive warning: {stderr:?}");
+    assert!(
+        !stderr.contains("[REDACTED by jingle]"),
+        "false positive: {stderr:?}"
+    );
+    assert!(
+        !stderr.contains("leaked"),
+        "false positive warning: {stderr:?}"
+    );
 
     let audit = std::fs::read_to_string(tv.audit_path()).unwrap();
-    assert!(!audit.contains("\"outcome\":\"leaked\""), "false leak audit: {audit}");
+    assert!(
+        !audit.contains("\"outcome\":\"leaked\""),
+        "false leak audit: {audit}"
+    );
 }
 
 #[cfg(unix)]
